@@ -2,7 +2,6 @@
 
 const Pkg = require('./package.json');
 const Domain = require('domain');
-const Entries = require('entries');
 const Hoek = require('hoek');
 
 const internals = {
@@ -36,10 +35,8 @@ exports.register = function (server, { lastly, shutdownTimeout = internals.defau
     server.ext('onRequest', (request, reply) => {
         if (shuttingDown) {
             server.log(['warn'], '503 response while shutting down.');
-            const response = reply().code(503);
-            for (const [key, value] of Entries(responseHeaders)) {
-                response.header(key, value);
-            }
+            request.raw.res.writeHead(503, responseHeaders);
+            request.raw.res.end();
             return;
         }
 

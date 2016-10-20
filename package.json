@@ -12,7 +12,6 @@
     "node": ">= 6.0.0"
   },
   "dependencies": {
-    "entries": "^1.0.1",
     "hoek": "^4.1.0"
   },
   "devDependencies": {
