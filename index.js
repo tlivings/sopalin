@@ -3,6 +3,7 @@
 const Pkg = require('./package.json');
 const Domain = require('domain');
 const Hoek = require('hoek');
+const Joi = require('joi');
 
 const internals = {
     info: {
@@ -17,51 +18,68 @@ const internals = {
     }
 };
 
-exports.register = function (server, { lastly, shutdownTimeout = internals.defaults.shutdownTimeout, shutdownHeaders = internals.defaults.shutdownHeaders, responseHeaders = internals.defaults.responseHeaders }, next) {
-    let shuttingDown = false;
+const schema = Joi.object({
+    lastly: Joi.func().allow(null),
+    shutdownTimeout: Joi.number().default(internals.defaults.shutdownTimeout),
+    shutdownHeaders: Joi.object().default(internals.defaults.shutdownHeaders),
+    responseHeaders: Joi.object().default(internals.defaults.responseHeaders)
+});
 
-    const close = Hoek.once((error) => {
-        server.log(['warn'], 'shutting down.');
-        server.root.stop({ timeout: shutdownTimeout }, () => {
-            if (lastly) {
-                lastly(error);
+const plugin = {
+    register(server, options, next) {
+        let shuttingDown = false;
+
+        const validation = Joi.validate(options, schema);
+
+        Hoek.assert(!validation.error, validation.error);
+
+        const { lastly, shutdownTimeout, shutdownHeaders, responseHeaders } = validation.value;
+
+        const close = Hoek.once((error) => {
+            server.log(['warn'], 'shutting down.');
+            server.root.stop({ timeout: shutdownTimeout }, () => {
+                if (lastly) {
+                    lastly(error);
+                    return;
+                }
+                server.log(['warn'], 'process exit.');
+                process.exit(1);
+            });
+        });
+
+        server.ext('onRequest', (request, reply) => {
+            if (shuttingDown) {
+                server.log(['warn'], '503 response while shutting down.');
+                request.raw.res.writeHead(503, responseHeaders);
+                request.raw.res.end();
                 return;
             }
-            server.log(['warn'], 'process exit.');
-            process.exit(1);
-        });
-    });
 
-    server.ext('onRequest', (request, reply) => {
-        if (shuttingDown) {
-            server.log(['warn'], '503 response while shutting down.');
-            request.raw.res.writeHead(503, responseHeaders);
-            request.raw.res.end();
-            return;
-        }
+            const d = Domain.create();
 
-        const d = Domain.create();
+            d.add(request.raw.req);
+            d.add(request.raw.res);
 
-        d.add(request.raw.req);
-        d.add(request.raw.res);
+            d.once('error', (error) => {
+                shuttingDown = true;
 
-        d.once('error', (error) => {
-            shuttingDown = true;
+                server.log(['error', 'uncaughtException'], error.stack);
 
-            server.log(['error', 'uncaughtException'], error.stack);
+                request.raw.res.writeHead(500, shutdownHeaders);
+                request.raw.res.end();
 
-            request.raw.res.writeHead(500, shutdownHeaders);
-            request.raw.res.end();
+                close(error);
+            });
 
-            close(error);
+            d.run(() => {
+                reply.continue();
+            });
         });
 
-        d.run(() => {
-            reply.continue();
-        });
-    });
-
-    next();
+        next();
+    }
 };
 
-exports.register.attributes = internals.info;
+plugin.register.attributes = internals.info;
+
+module.exports = plugin;
