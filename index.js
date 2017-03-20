@@ -49,7 +49,7 @@ const plugin = {
 
         server.ext('onRequest', (request, reply) => {
             if (shuttingDown) {
-                server.log(['warn'], '503 response while shutting down.');
+                request.log(['warn'], '503 response while shutting down.');
                 request.raw.res.writeHead(503, responseHeaders);
                 request.raw.res.end();
                 return;
@@ -63,7 +63,7 @@ const plugin = {
             d.once('error', (error) => {
                 shuttingDown = true;
 
-                server.log(['error', 'uncaughtException'], error.stack);
+                request.log(['error', 'uncaughtException'], error.stack);
 
                 request.raw.res.writeHead(500, shutdownHeaders);
                 request.raw.res.end();
