@@ -17,14 +17,14 @@
     "joi": "^10.2.2"
   },
   "devDependencies": {
-    "eslint": "^3.7.1",
+    "eslint": "^3.15.0",
     "eslint-config-hapi": "^10.0.0",
     "eslint-plugin-hapi": "^4.0.0",
-    "good": "^7.0.2",
-    "good-console": "^6.1.2",
-    "hapi": "^15.1.1",
-    "istanbul": "^0.4.1",
-    "tape": "^4.2.2"
+    "good": "^7.1.0",
+    "good-console": "^6.4.0",
+    "hapi": "^16.1.0",
+    "istanbul": "^0.4.5",
+    "tape": "^4.6.3"
   },
   "scripts": {
     "test": "tape test/*.js",
