@@ -9,7 +9,7 @@ Plugin will return a `500` status code for the request which spawned the unhandl
 ## Registration options
 
 - `shutdownHeaders` - Response headers to return when an error occurs. Defaults to `{}`.
-- `responseHeaders` - Reponse headers to return during a post-error shutdown. Defaults to `{}`.
+- `responseHeaders` - Response headers to return post error, while the server is still shutting down. Defaults to `{}`.
 - `shutdownTimeout` - Timeout option for Hapi.Server#stop. Defaults to `10000`.
 - `lastly` - A final callback for clean up. Accepted signature: `function(error)`. Called after server shutdown.
 
