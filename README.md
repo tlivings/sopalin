@@ -19,9 +19,11 @@ Plugin will return a `500` status code for the request which spawned the unhandl
 
 ```js
 const Hapi = require('hapi');
+
 const server = new Hapi.Server({
     useDomains: false
 });
+
 server.register({
     register: require('sopalin'),
     options: {
