@@ -48,25 +48,27 @@ const plugin = {
         });
 
         server.ext('onRequest', (request, reply) => {
+            const { req, res } = request.raw;
+
             if (shuttingDown) {
                 request.log(['warn'], '503 response while shutting down.');
-                request.raw.res.writeHead(503, responseHeaders);
-                request.raw.res.end();
+                res.writeHead(503, responseHeaders);
+                res.end();
                 return;
             }
 
             const d = Domain.create();
 
-            d.add(request.raw.req);
-            d.add(request.raw.res);
+            d.add(req);
+            d.add(res);
 
             d.once('error', (error) => {
                 shuttingDown = true;
 
                 request.log(['error', 'uncaughtException'], error.stack);
 
-                request.raw.res.writeHead(500, shutdownHeaders);
-                request.raw.res.end();
+                res.writeHead(500, shutdownHeaders);
+                res.end();
 
                 close(error);
             });
