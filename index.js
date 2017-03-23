@@ -20,7 +20,6 @@ const internals = {
 const schema = Joi.object({
     lastly: Joi.func().allow(null),
     shutdownTimeout: Joi.number().default(internals.defaults.shutdownTimeout),
-    shutdownHeaders: Joi.object().default(internals.defaults.shutdownHeaders),
     replyHeaders: Joi.object().default(internals.defaults.replyHeaders)
 });
 
