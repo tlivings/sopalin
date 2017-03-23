@@ -2,42 +2,32 @@
 
 Wipe up spilled milk in Hapi.
 
-Plugin is a registrable replacement to Hapi.js' domain/protect logic which will gracefully shutdown Node as a result of a uncaught exception.
-
-Plugin will return a `500` status code for the request which spawned the unhandled exception and `503` to any incoming requests until completely shut down.
+A plugin to shutdown on uncaughtExceptions, while allowing in-flight responses to complete. While the server is shutting down,
+new requests will be responded to with a `503`.
 
 ## Registration options
 
-- `shutdownHeaders` - Response headers to return when an error occurs. Defaults to `{}`.
-- `responseHeaders` - Response headers to return post error, while the server is still shutting down. Defaults to `{}`.
+- `replyHeaders` - Response headers to return post error, while the server is still shutting down. Defaults to `{}`.
 - `shutdownTimeout` - Timeout option for Hapi.Server#stop. Defaults to `10000`.
 - `lastly` - A final callback for clean up. Accepted signature: `function(error)`. Called after server shutdown.
 
 ## Usage
-1. Set the Hapi.Server.useDomains option to `false`.
-2. Register the plugin.
 
-```js
+```javascript
 const Hapi = require('hapi');
+const Sopalin = require('sopalin');
 
-const server = new Hapi.Server({
-    useDomains: false
-});
+const server = new Hapi.Server();
 
 server.register({
-    register: require('sopalin'),
+    register: Sopalin,
     options: {
-        shutdownTimeout: 15000
+        shutdownTimeout: 15000,
+        replyHeaders: {
+            'x-custom-retry-header': 'true'
+        }
     }
 }, (error) => {
-    server.route({
-        method: 'GET',
-        path: '/',
-        handler: function (request, reply) {
-            setImmediate(() => {
-                throw new Error('Something blew up!');
-            });
-        }
-    });
+    //Everything else...
 });
 ```

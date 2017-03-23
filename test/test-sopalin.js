@@ -7,11 +7,9 @@ const Hapi = require('hapi');
 Test('test sopalin', (t) => {
 
     t.test('plan', (t) => {
-        t.plan(6);
+        t.plan(5);
 
-        const server = new Hapi.Server({
-            useDomains: false
-        });
+        const server = new Hapi.Server();
 
         server.connection({ port: 3000 });
 
@@ -19,15 +17,12 @@ Test('test sopalin', (t) => {
             {
                 register: Sopalin.register,
                 options: {
-                    shutdownHeaders: {
+                    replyHeaders: {
                         'a': 'a-header'
-                    },
-                    responseHeaders: {
-                        'b': 'b-header'
                     },
                     lastly: (error) => {
                         t.pass('lastly called.');
-                        t.equal(error.message, 'Something blew up!', 'error passed to lastly.');
+                        t.equal(error.message, 'Uncaught error: Something blew up!', 'error passed to lastly.');
                     }
                 }
             },
@@ -62,17 +57,17 @@ Test('test sopalin', (t) => {
                 url: '/'
             }, (response) => {
                 t.equal(response.statusCode, 500, 'error response.');
-                t.equal(response.headers.a, 'a-header', 'shutdownHeaders passed.');
-                server.inject({
-                    method: 'GET',
-                    url: '/'
-                }, (response) => {
-                    t.equal(response.statusCode, 503, '503 response.');
-                    t.equal(response.headers.b, 'b-header', 'responseHeaders passed.');
+                setImmediate(() => {
+                    server.inject({
+                        method: 'GET',
+                        url: '/'
+                    }, (response) => {
+                        t.equal(response.statusCode, 503, '503 response.');
+                        t.equal(response.headers.a, 'a-header', 'replyHeaders passed.');
+                    });
                 });
             });
         });
-
 
     });
 
