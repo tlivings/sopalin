@@ -7,7 +7,7 @@ const Hapi = require('hapi');
 Test('test sopalin', (t) => {
 
     t.test('plan', (t) => {
-        t.plan(5);
+        t.plan(7);
 
         const server = new Hapi.Server();
 
@@ -21,6 +21,7 @@ Test('test sopalin', (t) => {
                         'a': 'a-header'
                     },
                     lastly: (error) => {
+                        t.ok(error, 'error.');
                         t.pass('lastly called.');
                         t.equal(error.message, 'Uncaught error: Something blew up!', 'error passed to lastly.');
                     }
@@ -42,6 +43,8 @@ Test('test sopalin', (t) => {
         ];
 
         server.register(plugins, (error) => {
+            t.error(error, 'should not be an error.');
+
             server.route({
                 method: 'GET',
                 path: '/',
