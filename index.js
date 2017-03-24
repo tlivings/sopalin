@@ -33,22 +33,27 @@ const plugin = {
 
         const { lastly, shutdownTimeout, replyHeaders } = validation.value;
 
-        server.on('request-error', (request, error) => {
+        const errorHandler = function (request, error) {
             if (error.domainThrown) {
                 shuttingDown = true;
 
                 server.log(['warn'], 'shutting down.');
 
                 server.root.stop({ timeout: shutdownTimeout }, () => {
+                    server.removeListener('request-error', errorHandler);
+
                     if (lastly) {
                         lastly(error);
                         return;
                     }
+
                     server.log(['warn'], 'process exit.');
                     process.exit(1);
                 });
             }
-        });
+        };
+
+        server.on('request-error', errorHandler);
 
         server.ext('onRequest', (request, reply) => {
             if (shuttingDown) {

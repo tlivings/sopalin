@@ -9,7 +9,7 @@ new requests will be responded to with a `503`.
 
 - `replyHeaders` - Response headers to return post error, while the server is still shutting down. Defaults to `{}`.
 - `shutdownTimeout` - Timeout option for Hapi.Server#stop. Defaults to `10000`.
-- `lastly` - A final callback for clean up. Accepted signature: `function(error)`. Called after server shutdown.
+- `lastly(error)` - An optional final callback for clean up. Called after server shutdown. The default behavior is to `process.exit(1)`.
 
 ## Usage
 
