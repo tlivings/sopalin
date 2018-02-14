@@ -47,7 +47,7 @@ const plugin = {
                         return;
                     }
 
-                    server.log(['warn'], 'process exit.');
+                    console.warn(Pkg.name, ': application process exit.');
                     process.exit(1);
                 });
             }
@@ -61,7 +61,7 @@ const plugin = {
 
                 const errorResponse = Boom.serverUnavailable();
 
-                errorResponse.output.headers = replyHeaders;
+                errorResponse.output.headers = Object.assign({ connection: 'close' }, replyHeaders);
 
                 reply(errorResponse);
                 return;

@@ -8,7 +8,7 @@ const Boom = require('boom');
 Test('test sopalin', (t) => {
 
     t.test('with lastly', (t) => {
-        t.plan(7);
+        t.plan(8);
 
         const server = new Hapi.Server();
 
@@ -68,6 +68,7 @@ Test('test sopalin', (t) => {
                     }, (response) => {
                         t.equal(response.statusCode, 503, '503 response.');
                         t.equal(response.headers.a, 'a-header', 'replyHeaders passed.');
+                        t.equal(response.headers.connection, 'close', 'connection close header passed.');
                     });
                 });
             });

@@ -1,7 +1,7 @@
 {
   "name": "sopalin",
   "description": "A uncaught exception handler for hapi that triggers a graceful shutdown.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Trevor Livingston <tlivings@gmail.com>",
   "license": "MIT",
   "repository": {
